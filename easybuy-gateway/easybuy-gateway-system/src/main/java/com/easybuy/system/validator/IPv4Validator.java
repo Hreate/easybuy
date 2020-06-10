@@ -1,8 +1,6 @@
 package com.easybuy.system.validator;
 
 import com.easybuy.system.util.SubnetMaskConvert;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -11,7 +9,7 @@ import reactor.util.function.Tuples;
 import java.util.ArrayList;
 
 public class IPv4Validator {
-    public static Mono<Void> validateIPv4(String IPv4Str, String hostName, ServerWebExchange exchange, GatewayFilterChain chain) {
+    public static Mono<Boolean> validateIPv4(String IPv4Str, String hostName) {
         //将请求IP切割，转换成整型数组
         var list = new ArrayList<Integer>();
         for (var i : hostName.split("\\.")) {
@@ -38,9 +36,9 @@ public class IPv4Validator {
         return Mono.zip(booleanMono1, booleanMono2)
                 .flatMap(e -> {
                     if (e.getT1() || e.getT2()) {
-                        return Mono.empty();
+                        return Mono.just(true);
                     } else {
-                        return chain.filter(exchange);
+                        return Mono.just(false);
                     }
                 });
     }
@@ -67,7 +65,7 @@ public class IPv4Validator {
                 Tuple2<Integer, Integer> tuple2 = Tuples.of(Integer.parseInt(segment[i]), subnetMask[i]);
                 list1.add(tuple2);
             }
-            //将list封装成flux返回
+            //将list封装成Mono返回
             return Mono.just(list1);
         })
                 .flatMap(e -> {

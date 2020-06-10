@@ -11,7 +11,7 @@ import reactor.util.function.Tuples;
 import java.util.ArrayList;
 
 public class IPv6Validator {
-    public static Mono<Void> validateIPv6(String IPv6Str, String hostName, ServerWebExchange exchange, GatewayFilterChain chain) {
+    public static Mono<Boolean> validateIPv6(String IPv6Str, String hostName) {
         //将请求IP切割，转换成整型数组
         var list = new ArrayList<Integer>();
         for (var i : hostName.split(":")) {
@@ -25,28 +25,28 @@ public class IPv6Validator {
         Mono<Boolean> booleanMono2 = Flux.fromArray(IPv6Str.split(","))
                 .filter(e -> !e.contains("/"))
                 .collectList()
-                .flatMap(e -> {
+                .map(e -> {
                     var flag = false;
                     for (var ip : e) {
                         if (ip.equals(hostName)) {
                             flag = true;
                         }
                     }
-                    return Mono.just(flag);
+                    return flag;
                 });
         return Mono.zip(booleanMono1, booleanMono2)
                 .flatMap(e -> {
                     if (e.getT1() || e.getT2()) {
-                        return Mono.empty();
+                        return Mono.just(true);
                     } else {
-                        return chain.filter(exchange);
+                        return Mono.just(false);
                     }
                 });
     }
 
     public static Mono<Boolean> validateIP(Integer[] sourceArr, Flux<String> ipSegment) {
         var list = new ArrayList<Integer>();
-        return ipSegment.flatMap(e -> {
+        return ipSegment.map(e -> {
             var arr = e.split("/");
             var list1 = new ArrayList<Tuple2<Integer, Integer>>();
             var prefix = IPv6PrefixConvert.convertPrefix(arr[1]);
@@ -55,9 +55,9 @@ public class IPv6Validator {
                 Tuple2<Integer, Integer> tuple2 = Tuples.of(Integer.parseInt(segment[i]), prefix[i]);
                 list1.add(tuple2);
             }
-            return Mono.just(list1);
+            return list1;
         })
-                .flatMap(e -> {
+                .map(e -> {
                     list.clear();
                     for (var i = 0; i < e.size(); i++) {
                         list.add(sourceArr[i] & e.get(i).getT2());
@@ -68,7 +68,7 @@ public class IPv6Validator {
                         list.add(i.getT1() & i.getT2());
                     }
                     var segment = list.toString();
-                    return Mono.just(sourceSeg.equals(segment));
+                    return sourceSeg.equals(segment);
                 })
                 .filter(e -> e)
                 .collectList()

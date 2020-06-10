@@ -12,7 +12,11 @@ import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @ConditionalOnProperty(name = "spring.cloud.gateway.interceptor.black-list-ipv4")
 @Component
@@ -59,13 +63,24 @@ public class BlacklistFilter implements GlobalFilter, Ordered {
         if ("localhost".equals(ipv4)) {
             ipv4 = "127.0.0.1";
         }
-
+        var IPv6 = Objects.requireNonNull(request.getRemoteAddress()).getHostName();
+        Mono<Boolean> IPv6Result = IPv6Validator.validateIPv6(IPv6Str, IPv6);
+        Mono<Boolean> IPv4Result = Mono.just(false);
         if (ipv4 != null && ipv4.length() > 0) {
-            return IPv4Validator.validateIPv4(IPv4Str, ipv4, exchange, chain);
-        } else {
-            var IPv6 = request.getRemoteAddress().getHostName();
-            return IPv6Validator.validateIPv6(IPv6Str, IPv6, exchange, chain);
+            IPv4Result= IPv4Validator.validateIPv4(IPv4Str, ipv4);
         }
+
+        return Mono.zip(IPv6Result,IPv4Result)
+                .flatMapMany(e -> Flux.just(e.getT1(), e.getT2()))
+                .filter(e -> e)
+                .collectList()
+                .flatMap(e -> {
+                    if (e.size() > 0) {
+                        return Mono.empty();
+                    } else {
+                        return chain.filter(exchange);
+                    }
+                });
     }
 
     @Override
