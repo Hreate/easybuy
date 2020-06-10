@@ -18,9 +18,9 @@ import reactor.core.publisher.Mono;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-@ConditionalOnProperty(name = "spring.cloud.gateway.interceptor.black-list-ipv4")
+//@ConditionalOnProperty(name = "spring.cloud.gateway.interceptor.black-list-ipv4")
 @Component
-//@Conditional(BlacklistCondition.class)
+@Conditional(BlacklistCondition.class)
 public class BlacklistFilter implements GlobalFilter, Ordered {
     @Value("${spring.cloud.gateway.interceptor.black-list-ipv4}")
     private String IPv4Str;
