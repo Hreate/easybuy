@@ -20,9 +20,11 @@ public class IPv6Validator {
         var hostnameArr = list.toArray(new Integer[0]);
         //将配置的黑名单IP网段过滤出来
         Flux<String> ipSegment = Flux.fromArray(IPv6Str.split(","))
+                .map(ip -> ip.replaceAll("\\s*", ""))
                 .filter(e -> e.contains("/"));
         Mono<Boolean> booleanMono1 = IPv6Validator.validateIP(hostnameArr, ipSegment);
         Mono<Boolean> booleanMono2 = Flux.fromArray(IPv6Str.split(","))
+                .map(ip -> ip.replaceAll("\\s*", ""))
                 .filter(e -> !e.contains("/"))
                 .collectList()
                 .map(e -> {

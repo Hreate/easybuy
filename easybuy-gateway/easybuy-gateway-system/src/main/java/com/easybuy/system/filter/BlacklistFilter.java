@@ -64,6 +64,9 @@ public class BlacklistFilter implements GlobalFilter, Ordered {
             ipv4 = "127.0.0.1";
         }
         var IPv6 = Objects.requireNonNull(request.getRemoteAddress()).getHostName();
+        if (IPv6.contains("DESKTOP")) {
+            IPv6 = "0:0:0:0:0:0:0:1";
+        }
         Mono<Boolean> IPv6Result = IPv6Validator.validateIPv6(IPv6Str, IPv6);
         Mono<Boolean> IPv4Result = Mono.just(false);
         if (ipv4 != null && ipv4.length() > 0) {
