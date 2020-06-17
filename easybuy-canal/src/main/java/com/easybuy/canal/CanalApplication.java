@@ -1,6 +1,6 @@
 package com.easybuy.canal;
 
-import com.ali.starter.canal.annotation.EnableCanalClient;
+import com.wwjd.starter.canal.annotation.EnableCanalClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

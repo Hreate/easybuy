@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,29 +20,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Service
 public class SpuServiceImpl implements SpuService {
 
-    @Autowired
-    private SpuMapper spuMapper;
-
-    @Autowired
-    private CategoryBrandMapper categoryBrandMapper;
-
-    @Autowired
-    private BrandMapper brandMapper;
-
-    @Autowired
-    private SkuMapper skuMapper;
-
-    @Autowired
-    private CategoryMapper categoryMapper;
-
-    @Autowired
-    private IdWorker idWorker;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final SpuMapper spuMapper;
+    private final CategoryBrandMapper categoryBrandMapper;
+    private final BrandMapper brandMapper;
+    private final SkuMapper skuMapper;
+    private final CategoryMapper categoryMapper;
+    private final IdWorker idWorker;
+    private final ObjectMapper objectMapper;
 
     /**
      * 查询全部列表

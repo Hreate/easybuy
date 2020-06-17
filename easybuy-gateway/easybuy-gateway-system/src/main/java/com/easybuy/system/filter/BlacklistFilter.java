@@ -18,8 +18,7 @@ import reactor.core.publisher.Mono;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-//@ConditionalOnProperty(name = "spring.cloud.gateway.interceptor.black-list-ipv4")
-@Component
+//@Component
 @Conditional(BlacklistCondition.class)
 public class BlacklistFilter implements GlobalFilter, Ordered {
     @Value("${spring.cloud.gateway.interceptor.black-list-ipv4}")
@@ -74,11 +73,11 @@ public class BlacklistFilter implements GlobalFilter, Ordered {
         }
 
         return Mono.zip(IPv6Result,IPv4Result)
-                .flatMapMany(e -> Flux.just(e.getT1(), e.getT2()))
-                .filter(e -> e)
+                .flatMapMany(results -> Flux.just(results.getT1(), results.getT2()))
+                .filter(bool -> bool)
                 .collectList()
-                .flatMap(e -> {
-                    if (e.size() > 0) {
+                .flatMap(resultList -> {
+                    if (resultList.size() > 0) {
                         return Mono.empty();
                     } else {
                         return chain.filter(exchange);

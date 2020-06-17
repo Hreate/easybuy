@@ -19,6 +19,7 @@
         <module>easybuy-service-system</module>
         <module>easybuy-service-user</module>
         <module>easybuy-service-file</module>
+        <module>easybuy-service-search</module>
     </modules>
 
 

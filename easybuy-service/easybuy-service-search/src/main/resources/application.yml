@@ -1,0 +1,41 @@
+server:
+  port: 9009
+spring:
+  application:
+    name: search
+  rabbitmq:
+    host: 49.235.222.12
+    port: 5673
+  redis:
+    host: 49.235.222.12
+    port: 10020
+  main:
+    allow-bean-definition-overriding: true #当遇到同样名字的时候，是否允许覆盖注册
+  elasticsearch:
+    rest:
+      uris: http://49.235.222.12:9200
+  thymeleaf:
+    cache: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:9000/eureka
+    instance:
+      prefer-ip-address: true
+feign:
+  hystrix:
+    enable: true
+  client:
+    config:
+      default:
+        connectTimeout: 600000
+        readTimeout: 600000
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE

@@ -21,15 +21,15 @@ public class IPv6Validator {
         //将配置的黑名单IP网段过滤出来
         Flux<String> ipSegment = Flux.fromArray(IPv6Str.split(","))
                 .map(ip -> ip.replaceAll("\\s*", ""))
-                .filter(e -> e.contains("/"));
-        Mono<Boolean> booleanMono1 = IPv6Validator.validateIP(hostnameArr, ipSegment);
+                .filter(ip -> ip.contains("/"));
+        Mono<Boolean> booleanMono1 = IPv6Validator.validateIPSegment(hostnameArr, ipSegment);
         Mono<Boolean> booleanMono2 = Flux.fromArray(IPv6Str.split(","))
                 .map(ip -> ip.replaceAll("\\s*", ""))
-                .filter(e -> !e.contains("/"))
+                .filter(ip -> !ip.contains("/"))
                 .collectList()
-                .map(e -> {
+                .map(ipList -> {
                     var flag = false;
-                    for (var ip : e) {
+                    for (var ip : ipList) {
                         if (ip.equals(hostName)) {
                             flag = true;
                         }
@@ -37,8 +37,8 @@ public class IPv6Validator {
                     return flag;
                 });
         return Mono.zip(booleanMono1, booleanMono2)
-                .flatMap(e -> {
-                    if (e.getT1() || e.getT2()) {
+                .flatMap(results -> {
+                    if (results.getT1() || results.getT2()) {
                         return Mono.just(true);
                     } else {
                         return Mono.just(false);
@@ -46,10 +46,10 @@ public class IPv6Validator {
                 });
     }
 
-    public static Mono<Boolean> validateIP(Integer[] sourceArr, Flux<String> ipSegment) {
+    public static Mono<Boolean> validateIPSegment(Integer[] sourceArr, Flux<String> ipSegment) {
         var list = new ArrayList<Integer>();
-        return ipSegment.map(e -> {
-            var arr = e.split("/");
+        return ipSegment.map(ip -> {
+            var arr = ip.split("/");
             var list1 = new ArrayList<Tuple2<Integer, Integer>>();
             var prefix = IPv6PrefixConvert.convertPrefix(arr[1]);
             var segment= arr[0].split(":");
@@ -59,23 +59,23 @@ public class IPv6Validator {
             }
             return list1;
         })
-                .map(e -> {
+                .map(ip -> {
                     list.clear();
-                    for (var i = 0; i < e.size(); i++) {
-                        list.add(sourceArr[i] & e.get(i).getT2());
+                    for (var i = 0; i < ip.size(); i++) {
+                        list.add(sourceArr[i] & ip.get(i).getT2());
                     }
                     var sourceSeg = list.toString();
                     list.clear();
-                    for (var i : e) {
+                    for (var i : ip) {
                         list.add(i.getT1() & i.getT2());
                     }
                     var segment = list.toString();
                     return sourceSeg.equals(segment);
                 })
-                .filter(e -> e)
+                .filter(bool -> bool)
                 .collectList()
-                .flatMap(e -> {
-                    if (e != null && e.size() > 0) {
+                .flatMap(resultList -> {
+                    if (resultList != null && resultList.size() > 0) {
                         return Mono.just(true);
                     } else {
                         return Mono.just(false);

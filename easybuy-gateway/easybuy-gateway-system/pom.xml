@@ -6,9 +6,7 @@
         <groupId>com.easybuy</groupId>
         <artifactId>easybuy-gateway</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.easybuy</groupId>
     <artifactId>easybuy-gateway-system</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>easybuy-gateway-system</name>
@@ -54,14 +52,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>14</source>
-                    <target>14</target>
-                </configuration>
             </plugin>
         </plugins>
     </build>

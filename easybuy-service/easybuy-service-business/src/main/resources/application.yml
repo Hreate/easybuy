@@ -5,15 +5,18 @@ spring:
     name: business
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.200.128:3306/changgou_business?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
-    username: root
-    password: root
+    url: jdbc:mysql://49.235.222.12:3306/changgou_business?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: admin
+    password: greenday
   main:
     allow-bean-definition-overriding: true #当遇到同样名字的时候，是否允许覆盖注册
+  rabbitmq:
+    host: 49.235.222.12
+    port: 5673
 eureka:
   client:
     service-url:
-      defaultZone: http://127.0.0.1:6868/eureka
+      defaultZone: http://127.0.0.1:9000/eureka
   instance:
     prefer-ip-address: true
 feign:

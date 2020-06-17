@@ -18,6 +18,7 @@
         <module>easybuy-service-order-api</module>
         <module>easybuy-service-system-api</module>
         <module>easybuy-service-user-api</module>
+        <module>easybuy-service-search-api</module>
     </modules>
 
     <dependencies>

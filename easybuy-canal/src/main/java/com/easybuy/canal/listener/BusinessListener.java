@@ -1,40 +1,33 @@
 package com.easybuy.canal.listener;
 
 import com.alibaba.otter.canal.protocol.CanalEntry;
-import com.ali.starter.canal.annotation.CanalEventListener;
-import com.ali.starter.canal.annotation.ListenPoint;
+import com.easybuy.canal.config.RabbitMQConfigure;
+import com.wwjd.starter.canal.annotation.CanalEventListener;
+import com.wwjd.starter.canal.annotation.ListenPoint;
+import com.wwjd.starter.canal.client.core.CanalMsg;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Flux;
 
-/**
- * @author ZJ
- */
+
 @CanalEventListener
 public class BusinessListener {
-
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @ListenPoint(schema = "changgou_business", table = {"tb_ad"})
-    public void adUpdate(CanalEntry.EventType eventType, CanalEntry.RowData rowData) {
-        System.err.println("广告数据发生变化");
+    @ListenPoint(schema = "changgou_business", table = "tb_ad")
+    public void adUpdate(CanalMsg canalMsg, CanalEntry.RowChange rowChange) {
 
-        //修改前数据
-        for(CanalEntry.Column column: rowData.getBeforeColumnsList()) {
-            if(column.getName().equals("position")){
-                System.out.println("发送消息到mq  ad_update_queue:"+column.getValue());
-                rabbitTemplate.convertAndSend("","ad_update_queue",column.getValue());  //发送消息到mq
-                break;
-            }
-        }
+        System.out.println("广告表数据发生改变");
 
-        //修改后数据
-        for(CanalEntry.Column column: rowData.getAfterColumnsList()) {
-            if(column.getName().equals("position")){
-                System.out.println("发送消息到mq  ad_update_queue:"+column.getValue());
-                rabbitTemplate.convertAndSend("","ad_update_queue",column.getValue());  //发送消息到mq
-                break;
-            }
-        }
+        Flux.fromIterable(rowChange.getRowDatasList())
+                .flatMap(dataList -> Flux.fromIterable(dataList.getAfterColumnsList()))
+                .filter(column -> "position".equals(column.getName()))
+                .doOnNext(column -> {
+                    System.out.printf("发送最新的数据到MQ：%s\n", column.getValue());
+                    rabbitTemplate.convertAndSend("", RabbitMQConfigure.AD_UPDATE_QUEUE, column.getValue());
+                })
+                .subscribe();
+
     }
 }
